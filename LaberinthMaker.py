@@ -1,129 +1,119 @@
 import random
 
-size = (33,33)
-pos = [0, 0]
-grid = []
-walls = []
-path = []
-Start = ()
-Here = ()
-lastint = []
-intersections = []
-monedas = []
-
-for x in range(1,size[0]+1):
-    for y in range(1,size[1]+1):
-        grid.append((x,y))
-        
-#Paredes arriba y abajo
-for x in range(size[0]+2):
-    walls.append((x,0))
-    walls.append((x,size[1]+1))
-#Paredes izquierda derecha
-for x in range(size[1]+2):
-    walls.append((0,x))
-    walls.append((size[0]+1,x))
-#Paredes Ejes dentro    
-for x in range(1,int(((size[0]+1)/2))):
-    for y in range(1,int(((size[1]+1)/2))):
-        walls.append((2*x,2*y))
-        grid.remove((2*x,2*y))
-        
-        
-def printa():
-    for y in range(0,size[1]+2):
-        line =[]
-        for x in range(0,size[0]+2):
-            if (x,y) == pos:
-                line.append("AA")
-            elif (x,y)==Start:
-                line.append("SS")
-            elif (x,y)in monedas:
-                line.append("MM")
-            elif (x,y)in walls:
-                line.append("▓▓")  
-            else:
-                line.append("░░")
-        
-        print((str(line).replace("'","").replace(",","").replace(" ","").replace("[","").replace("]","")))
-    
+Size = (7,8)
+Grid, Walls, Path, CrossroadWall, Intersections, Monedas = [],[],[],[],[],[]
 
 
+#Grid Construction
+def GridConstruction():
+    for x in range(1, Size[0] + 1):
+        for y in range(1, Size[1] + 1):
+            Grid.append((x,y))
+            
+    #Paredes arriba y abajo
+    for x in range(Size[0] + 2):
+        Walls.append((x, 0)) 
+        Walls.append((x, Size[1] + 1)) 
+
+    #Paredes izquierda derecha
+    for x in range(Size[1] + 2):
+        Walls.append((0, x))
+        Walls.append((Size[0] + 1, x))
+
+    #Paredes Ejes dentro    
+    for x in range(1, int(((Size[0]+1) / 2))):
+        for y in range(1, int(((Size[1]+1) / 2))):
+            Walls.append((2 * x, 2 * y))
+            Grid.remove((2 * x, 2 * y))
+        
+pruebalinea = ''
+def PrintDisplay():
+    global pruebalinea
+    pruebalinea = ''
+    for y in range(0, Size[1] + 2):         
+        Line = []
+        for x in range(0, Size[0] + 2):
+            if (x, y) == Pos: Line.append("AA")
+            elif (x, y) == Start: Line.append("SS")
+            elif (x, y) in Monedas: Line.append("MM")
+            elif (x, y) in Walls: Line.append("▓▓") 
+            else: Line.append("░░")
+        
+        
+        pruebalinea += (str(Line)
+               .replace("'" , "")
+               .replace("," , "")
+               .replace(" " , "")
+               .replace("[" , "")
+               .replace("]" , "")
+               ) + "\n"
+        
+    print(pruebalinea)
+#         print((str(Line)
+#                .replace("'" , "")
+#                .replace("," , "")
+#                .replace(" " , "")
+#                .replace("[" , "")
+#                .replace("]" , "")
+#                ))
 
 # Selecciona un lugar donde empezar
-def PressStart(x,y):
-#   pos[0] = random.randint(1, x)
-#   pos[1] = random.randint(1, y)
-    global pos, Start
-    #pos = (1,1)
-    pos = random.choice(grid)
-    po = tuple(pos)
-    path.append(po)
-    grid.remove(po)
-    Start = po
+def PressStart(): #Picks a random space on the grid, and returns it as a tuple
+    LocalPos = random.choice(Grid)
+    Path.append(LocalPos)
+    Grid.remove(LocalPos)
+    return LocalPos
   
 # Moves to a clean path
 def Move(x,y):
-    global cami, pos,lastint,intersections
+    global Pos
     
-    cami = []
-    if (x+1,y) not in walls and (x+1,y) not in path:
-        cami.append((x+1,y))
-    if (x-1,y) not in walls and (x-1,y) not in path:
-        cami.append((x-1,y))
-    if (x,y+1) not in walls and (x,y+1) not in path:
-        cami.append((x,y+1))
-    if (x,y-1) not in walls and (x,y-1) not in path:
-        cami.append((x,y-1)) 
-    if cami == []:
-        if pos in intersections:    
-            walls.append(pos)
-            try:
-                intersections.remove(pos)
-                path.remove(pos)
-            except ValueError:
-                pass
-#         print(str(pos)+"Dead End")
-#         printa()
-        pos = lastint.pop()
-        intersections.append(pos)
-        path.append(pos)
-        walls.remove(pos)
+    Caminos = []
 
+    for Coords in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
+        if Coords in Grid:
+            Caminos.append(Coords)
+
+    if not Caminos: #There is no way to go
+        if Pos in Intersections:    
+            Walls.append(Pos)
+            Path.remove(Pos)
+            Intersections.remove(Pos)
+
+    #    print(str(Pos),"Dead End")
+    #    PrintDisplay() #Si se quiere printear cada interseccion
+
+        Pos = CrossroadWall.pop() #Se mueve a  la ultima interseccion y prueba con una pared
+        Intersections.append(Pos)
+        Path.append(Pos)
+        Walls.remove(Pos)
     else:
-        pos = random.choice(cami)
-        cami.remove(pos)
-        if cami != []:
-            for x in cami:
-                walls.append(x)
-                grid.remove(x)
-                lastint.append(x)
-#             wat = random.choice(cami)
-#             walls.append(wat)
-#             grid.remove(wat)
-        path.append(pos)
-        grid.remove(pos)
-        printa()
+        Pos = random.choice(Caminos)
+        Caminos.remove(Pos)
+        if Caminos: #If there is some other place to go
+            for UnusedPaths in Caminos:
+                Walls.append(UnusedPaths)
+                Grid.remove(UnusedPaths)
+                CrossroadWall.append(UnusedPaths)
+        Path.append(Pos)
+        Grid.remove(Pos)
+        PrintDisplay() #Si se quiere printear cada paso
+    return 
 
-def Verify(newpos):
 
-    pass
 
-def regreso():
-    
-    pass
+#Start = Pos = PressStart()
+
+GridConstruction()
+Start = Pos = PressStart()
+
+while Grid: #Not Empty
+    Move(Pos[0], Pos[1])   
+
+Monedas = random.choices(
+            Path, k = random.randint(1, Size[0])
+            )
+
+PrintDisplay() #Final
+
    
-
-
-
-
-
-PressStart(size[0],size[1])
-print(pos)
-while not grid:
-    Move(pos[0],pos[1])
-    
-monedas = random.choices(path,k=random.randint(1,size[0]))
-
-printa()
-
