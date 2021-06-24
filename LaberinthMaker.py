@@ -1,15 +1,17 @@
 import random
 
-Size = (7,8)
+Size = (7,7)
 Grid, Walls, Path, CrossroadWall, Intersections, Monedas = [],[],[],[],[],[]
-
-
-#Grid Construction
-def GridConstruction():
+      
+ends = []  
+  
+#Grid Construction 
+def GridConstruction(): 
+    #Grid dentro
     for x in range(1, Size[0] + 1):
         for y in range(1, Size[1] + 1):
             Grid.append((x,y))
-            
+        
     #Paredes arriba y abajo
     for x in range(Size[0] + 2):
         Walls.append((x, 0)) 
@@ -26,42 +28,23 @@ def GridConstruction():
             Walls.append((2 * x, 2 * y))
             Grid.remove((2 * x, 2 * y))
         
-pruebalinea = ''
 def PrintDisplay():
-    global pruebalinea
-    pruebalinea = ''
+    Line = ""
     for y in range(0, Size[1] + 2):         
-        Line = []
         for x in range(0, Size[0] + 2):
-            if (x, y) == Pos: Line.append("AA")
-            elif (x, y) == Start: Line.append("SS")
-            elif (x, y) in Monedas: Line.append("MM")
-            elif (x, y) in Walls: Line.append("▓▓") 
-            else: Line.append("░░")
-        
-        
-        pruebalinea += (str(Line)
-               .replace("'" , "")
-               .replace("," , "")
-               .replace(" " , "")
-               .replace("[" , "")
-               .replace("]" , "")
-               ) + "\n"
-        
-    print(pruebalinea)
-#         print((str(Line)
-#                .replace("'" , "")
-#                .replace("," , "")
-#                .replace(" " , "")
-#                .replace("[" , "")
-#                .replace("]" , "")
-#                ))
+            if (x, y) == Pos: Line +=       "🟨"
+            elif (x, y) == Start: Line +=   "💠" #
+            elif (x, y) in Monedas: Line += "🔶" #
+            elif (x, y) in Walls: Line +=   "⬜"
+            else: Line +=                   "⬛"
+        Line += "\n"
+    print(Line)
 
-# Selecciona un lugar donde empezar
+# Chooses a start position
 def PressStart(): #Picks a random space on the grid, and returns it as a tuple
-    LocalPos = random.choice(Grid)
+    LocalPos = (1,1)
     Path.append(LocalPos)
-    Grid.remove(LocalPos)
+    Grid.remove(LocalPos) 
     return LocalPos
   
 # Moves to a clean path
@@ -80,8 +63,9 @@ def Move(x,y):
             Path.remove(Pos)
             Intersections.remove(Pos)
 
-    #    print(str(Pos),"Dead End")
-    #    PrintDisplay() #Si se quiere printear cada interseccion
+        #print(str(Pos),"Dead End")
+        ends.append(Pos)
+        #PrintDisplay() #Si se quiere printear cada interseccion
 
         Pos = CrossroadWall.pop() #Se mueve a  la ultima interseccion y prueba con una pared
         Intersections.append(Pos)
@@ -97,13 +81,10 @@ def Move(x,y):
                 CrossroadWall.append(UnusedPaths)
         Path.append(Pos)
         Grid.remove(Pos)
-        PrintDisplay() #Si se quiere printear cada paso
+        #PrintDisplay() #Si se quiere printear cada paso
     return 
 
-
-
-#Start = Pos = PressStart()
-
+#PROGRAMA
 GridConstruction()
 Start = Pos = PressStart()
 
@@ -114,6 +95,7 @@ Monedas = random.choices(
             Path, k = random.randint(1, Size[0])
             )
 
-PrintDisplay() #Final
+if ends:
+    Pos = ends[int(len(ends)/6)]
 
-   
+PrintDisplay() #Final
